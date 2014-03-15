@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.rockhoppertech.music.fx.tracklib.*?>
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.collections.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?scenebuilder-classpath-element ../../../../../rockymusic/rockymusic-fx/target/classes?>
+<?scenebuilder-classpath-element ../../../../../../../../.m2/repository/org/slf4j/slf4j-api/1.7.6/slf4j-api-1.7.6.jar?>
+<?scenebuilder-classpath-element ../../../../../../../../.m2/repository/com/rockhoppertech/rockymusic-core/0.0.1-SNAPSHOT/rockymusic-core-0.0.1-SNAPSHOT.jar?>
+<?scenebuilder-classpath-element ../../../../../../../../.m2/repository/org/glassfish/javax.json/1.0.4/javax.json-1.0.4.jar?>
+<?scenebuilder-classpath-element ../../../../target/classes?>
+
+<AnchorPane id="AnchorPane" fx:id="root" prefHeight="1000.0" prefWidth="1000.0" xmlns:fx="http://javafx.com/fxml" fx:controller="com.rockhoppertech.music.fx.tracklib.TrackLibAppController">
+  <children>
+    <BorderPane prefHeight="327.0" prefWidth="446.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <bottom>
+        <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
+          <children>
+            <Button mnemonicParsing="false" onAction="#playAction" text="Play" />
+          </children>
+        </HBox>
+      </bottom>
+      <center>
+        <VBox prefHeight="200.0" prefWidth="100.0">
+          <children>
+            <SplitPane dividerPositions="0.3897795591182365" focusTraversable="true" prefHeight="646.0" prefWidth="1000.0" VBox.vgrow="ALWAYS">
+              <items>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                  <children>
+                    <ListView fx:id="trackList" prefHeight="364.0" prefWidth="360.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="22.0" AnchorPane.topAnchor="14.0" />
+                    <Button layoutX="29.0" layoutY="396.0" mnemonicParsing="false" onAction="#addAction" text="Add" />
+                    <Button layoutX="112.0" layoutY="396.0" mnemonicParsing="false" onAction="#removeAction" text="Remove" />
+                  </children>
+                </AnchorPane>
+                <AnchorPane id="AnchorPane" prefHeight="875.0" prefWidth="597.0">
+                  <children>
+                    <TrackPane fx:id="trackPane" prefHeight="644.0" prefWidth="647.0" AnchorPane.bottomAnchor="229.0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="-498.0" AnchorPane.topAnchor="1.0">
+                      <padding>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                      </padding>
+                    </TrackPane>
+                  </children>
+                </AnchorPane>
+              </items>
+            </SplitPane>
+          </children>
+        </VBox>
+      </center>
+      <top>
+        <MenuBar useSystemMenuBar="true">
+          <menus>
+            <Menu mnemonicParsing="true" text="_File">
+              <items>
+                <MenuItem mnemonicParsing="false" onAction="#exitAction" text="Close" />
+              </items>
+            </Menu>
+            <Menu mnemonicParsing="false" text="Edit">
+              <items>
+                <MenuItem mnemonicParsing="false" text="Delete" />
+              </items>
+            </Menu>
+            <Menu mnemonicParsing="false" text="Help">
+              <items>
+                <MenuItem mnemonicParsing="false" text="About" />
+              </items>
+            </Menu>
+          </menus>
+        </MenuBar>
+      </top>
+    </BorderPane>
+  </children>
+</AnchorPane>

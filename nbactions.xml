@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<actions>
+        <action>
+            <actionName>CUSTOM-jfx run</actionName>
+            <displayName>jfx run</displayName>
+            <goals>
+                <goal>jfx:run</goal>
+            </goals>
+        </action>
+        <action>
+            <actionName>CUSTOM-jfx run debug</actionName>
+            <displayName>jfx run debug</displayName>
+            <goals>
+                <goal>jfx:run</goal>
+            </goals>
+        </action>
+    </actions>
