@@ -51,10 +51,33 @@ public class TrackLibModel {
     }
 
     public void add(MIDITrack track) {
-        trackList.add(track);
+        //trackList.add(track);
+        tracksProperty.add(track);
     }
 
     public void remove(MIDITrack track) {
-        trackList.remove(track);
+        //trackList.remove(track);
+        tracksProperty.remove(track);
+    }
+
+    private MIDITrack selectedTrack;
+
+    public void setSelectedMIDITrack(MIDITrack track) {
+        this.selectedTrack = track;
+
+    }
+
+    /**
+     * @return the selectedTrack
+     */
+    public MIDITrack getSelectedTrack() {
+        return selectedTrack;
+    }
+
+    /**
+     * @param selectedTrack the selectedTrack to set
+     */
+    public void setSelectedTrack(MIDITrack selectedTrack) {
+        this.selectedTrack = selectedTrack;
     }
 }

@@ -20,11 +20,16 @@ package com.rockhoppertech.music.fx.tracklib;
  * #L%
  */
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.adapter.JavaBeanDoublePropertyBuilder;
+import javafx.beans.property.adapter.JavaBeanIntegerPropertyBuilder;
 import javafx.beans.property.adapter.JavaBeanObjectPropertyBuilder;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -34,6 +39,8 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.ComboBoxBuilder;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TableColumn;
@@ -42,6 +49,7 @@ import javafx.scene.control.TableColumn.CellEditEvent;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.input.DataFormat;
@@ -50,9 +58,12 @@ import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
+
+import javax.xml.stream.XMLStreamException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,6 +71,10 @@ import org.slf4j.LoggerFactory;
 import com.rockhoppertech.music.Pitch;
 import com.rockhoppertech.music.PitchFactory;
 import com.rockhoppertech.music.PitchFormat;
+import com.rockhoppertech.music.fx.cmn.musicxml.TrackToMusicXML;
+import com.rockhoppertech.music.fx.components.RTIDialog;
+import com.rockhoppertech.music.midi.gm.MIDIGMPatch;
+import com.rockhoppertech.music.midi.js.Instrument;
 import com.rockhoppertech.music.midi.js.MIDINote;
 import com.rockhoppertech.music.midi.js.MIDITrack;
 import com.rockhoppertech.music.midi.js.MIDITrackBuilder;
@@ -104,6 +119,9 @@ public class TrackLibAppController {
     private TableColumn<MIDINote, Double> columnStart;
 
     @FXML
+    private TableColumn<MIDINote, Integer> columnChannel;
+
+    @FXML
     private TextArea descriptionTextArea;
 
     @FXML
@@ -113,9 +131,46 @@ public class TrackLibAppController {
     private TextField nameTextField;
 
     @FXML
+    private ComboBox<Instrument> instrumentComboBox;
+
+    @FXML
     // private TableView<MIDITrack> trackTable;
     private TableView<MIDINote> trackTable;
     private ObservableList<MIDINote> tableDataList;
+
+    private File currentSaveFile;
+
+    @FXML
+    void exportTracktoMusicXML(ActionEvent event) {
+        MIDITrack track = trackList.getSelectionModel().getSelectedItem();
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save selected track to MusicXML File");
+        // if (currentSaveFile == null) {
+        currentSaveFile = fileChooser.showSaveDialog(this.stage);
+        if (!currentSaveFile.getName().endsWith(".xml")) {
+            currentSaveFile = new File(currentSaveFile.getAbsolutePath()
+                    + ".xml");
+        }
+        logger.debug("exporting to {}", currentSaveFile);
+        // }
+        String workTitle = "Stuff";
+        String composer = "Mozart";
+        if (currentSaveFile != null) {
+            try {
+                FileOutputStream out = new FileOutputStream(currentSaveFile);
+                TrackToMusicXML.emitXML(track, out, workTitle, composer);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                RTIDialog.showMessageDialog(e.getLocalizedMessage());
+                e.printStackTrace();
+            } catch (XMLStreamException e) {
+                RTIDialog.showMessageDialog(e.getLocalizedMessage());
+                e.printStackTrace();
+            }
+
+        }
+    }
 
     @FXML
     void exitAction(ActionEvent event) {
@@ -174,6 +229,10 @@ public class TrackLibAppController {
 
     private TrackLibModel model;
 
+    ObservableList<String> pitchList;
+    ObservableList<Integer> midiValues;
+    ObservableList<Integer> channelList;
+
     @FXML
     void initialize() {
 
@@ -182,143 +241,16 @@ public class TrackLibAppController {
 
         trackPane.refresh();
 
+        configureInstrumentComboBox();
+
         setupDragonDrop();
 
         // columnStart
         // .setCellValueFactory(new PropertyValueFactory<MIDINote, Double>(
         // "startBeat"));
 
-        StringConverter<Double> dsc = new StringConverter<Double>() {
-            @Override
-            public String toString(Double t) {
-                return String.format("%f", t);
-            }
-
-            @Override
-            public Double fromString(String string) {
-                return Double.parseDouble(string);
-            }
-        };
-
-        StringConverter<MIDINote> midiNoteStartConverter = new StringConverter<MIDINote>() {
-            @Override
-            public String toString(MIDINote t) {
-                return String.format("%f", t.getStartBeat());
-            }
-
-            @Override
-            public MIDINote fromString(String string) {
-                throw new UnsupportedOperationException("Not supported yet.");
-            }
-        };
-        StringConverter<Pitch> stringPitchConverter = new StringConverter<Pitch>() {
-            @Override
-            public String toString(Pitch t) {
-                return PitchFormat.getInstance().format(t);
-            }
-
-            @Override
-            public Pitch fromString(String string) {
-               return PitchFactory.getPitch(string);
-            }
-        };
-
-        columnStart
-                .setCellValueFactory(new Callback<CellDataFeatures<MIDINote, Double>, ObservableValue<Double>>() {
-                    public ObservableValue<Double> call(
-                            CellDataFeatures<MIDINote, Double> note) {
-                        // note.getValue() returns the MIDINote instance for a
-                        // particular TableView row
-                        MIDINote n = note.getValue();
-                        Property p = null;
-                        try {
-                            p = JavaBeanDoublePropertyBuilder
-                                    .create()
-                                    .bean(n)
-                                    .name("startBeat")
-                                    .build();
-                        } catch (NoSuchMethodException e) {
-                            e.printStackTrace();
-                        }
-                        return p;
-
-                        // return note.getValue().firstNameProperty();
-                    }
-                });
-        columnStart.setCellFactory(TextFieldTableCell
-                .<MIDINote, Double> forTableColumn(dsc));
-        columnStart.setOnEditCommit(
-                new EventHandler<CellEditEvent<MIDINote, Double>>() {
-                    @Override
-                    public void handle(CellEditEvent<MIDINote, Double> t) {
-                        ((MIDINote) t.getTableView().getItems().get(
-                                t.getTablePosition().getRow())
-                        ).setStartBeat(t.getNewValue());
-                    }
-                }
-                );
-
-        columnDuration
-                .setCellValueFactory(new Callback<CellDataFeatures<MIDINote, Double>, ObservableValue<Double>>() {
-                    public ObservableValue<Double> call(
-                            CellDataFeatures<MIDINote, Double> note) {
-                        MIDINote n = note.getValue();
-                        Property p = null;
-                        try {
-                            p = JavaBeanDoublePropertyBuilder
-                                    .create()
-                                    .bean(n)
-                                    .name("duration")
-                                    .build();
-                        } catch (NoSuchMethodException e) {
-                            e.printStackTrace();
-                        }
-                        return p;
-                    }
-                });
-        columnDuration.setCellFactory(TextFieldTableCell
-                .<MIDINote, Double> forTableColumn(dsc));
-        columnDuration.setOnEditCommit(
-                new EventHandler<CellEditEvent<MIDINote, Double>>() {
-                    @Override
-                    public void handle(CellEditEvent<MIDINote, Double> t) {
-                        ((MIDINote) t.getTableView().getItems().get(
-                                t.getTablePosition().getRow())
-                        ).setDuration(t.getNewValue());
-                    }
-                }
-                );
-
-        columnPitch.setCellFactory(TextFieldTableCell
-                .<MIDINote, Pitch> forTableColumn(stringPitchConverter));
-        columnPitch.setOnEditCommit(
-                new EventHandler<CellEditEvent<MIDINote, Pitch>>() {
-                    @Override
-                    public void handle(CellEditEvent<MIDINote, Pitch> t) {
-                        ((MIDINote) t.getTableView().getItems().get(
-                                t.getTablePosition().getRow())
-                        ).setPitch(t.getNewValue());
-                    }
-                }
-                );
-        columnPitch
-                .setCellValueFactory(new Callback<CellDataFeatures<MIDINote, Pitch>, ObservableValue<Pitch>>() {
-                    public ObservableValue<Pitch> call(
-                            CellDataFeatures<MIDINote, Pitch> note) {
-                        MIDINote n = note.getValue();
-                        Property p = null;
-                        try {
-                            p = JavaBeanObjectPropertyBuilder
-                                    .create()
-                                    .bean(n)
-                                    .name("pitch")
-                                    .build();
-                        } catch (NoSuchMethodException e) {
-                            e.printStackTrace();
-                        }
-                        return p;
-                    }
-                });
+        configureTrackTableView();
+        this.tableDataList = FXCollections.observableArrayList();
 
         trackList.setCellFactory(new Callback<ListView<MIDITrack>,
                 ListCell<MIDITrack>>() {
@@ -328,8 +260,6 @@ public class TrackLibAppController {
                     }
                 });
 
-        this.tableDataList = FXCollections.observableArrayList();
-
         trackList.getSelectionModel().selectedItemProperty().addListener(
                 new ChangeListener<MIDITrack>() {
 
@@ -338,10 +268,10 @@ public class TrackLibAppController {
                             ObservableValue<? extends MIDITrack> observable,
                             MIDITrack oldValue, MIDITrack newValue) {
 
-                        // model.setMIDITrack(newValue);
-
                         // SymParams params = model.getParamsForTrack(newValue);
                         if (newValue != null) {
+                            logger.debug("handling list item select");
+                            model.setSelectedMIDITrack(newValue);
                             tableDataList.clear();
                             for (MIDINote note : newValue) {
                                 tableDataList.add(note);
@@ -352,6 +282,9 @@ public class TrackLibAppController {
                             descriptionTextArea.setText(newValue
                                     .getDescription());
                             rawTextArea.setText(newValue.toString());
+
+                            instrumentComboBox.getSelectionModel().select(
+                                    newValue.getInstrument());
 
                             // SymParams params = (SymParams) newValue
                             // .getUserData();
@@ -373,6 +306,8 @@ public class TrackLibAppController {
                         trackList.getItems().addAll(change.getAddedSubList());
                         for (MIDITrack track : change.getAddedSubList()) {
                             trackPane.add(track);
+                            logger.debug("added to trackpane {}", track);
+                            
                         }
                     } else if (change.wasRemoved()) {
                         logger.debug("removing {}", change.getRemoved());
@@ -472,6 +407,289 @@ public class TrackLibAppController {
             }
         });
 
+    }
+
+    void configureTrackTableView() {
+        channelList = FXCollections
+                .observableArrayList();
+        for (int i = 0; i < 16; i++) {
+            channelList.add(i);
+        }
+
+        midiValues = FXCollections.observableArrayList();
+        for (int i = 0; i < 128; i++) {
+            midiValues.add(i);
+        }
+        pitchList = FXCollections.observableArrayList();
+        for (int i = 0; i < 128; i++) {
+            pitchList.add(PitchFormat
+                    .midiNumberToString(i));
+        }
+
+        StringConverter<Double> dsc = new StringConverter<Double>() {
+            @Override
+            public String toString(Double t) {
+                return String.format("%f", t);
+            }
+
+            @Override
+            public Double fromString(String string) {
+                return Double.parseDouble(string);
+            }
+        };
+
+        // StringConverter<MIDINote> midiNoteStartConverter = new
+        // StringConverter<MIDINote>() {
+        // @Override
+        // public String toString(MIDINote t) {
+        // return String.format("%f", t.getStartBeat());
+        // }
+        //
+        // @Override
+        // public MIDINote fromString(String string) {
+        // throw new UnsupportedOperationException("Not supported yet.");
+        // }
+        // };
+        StringConverter<Pitch> stringPitchConverter = new StringConverter<Pitch>() {
+            @Override
+            public String toString(Pitch t) {
+                return PitchFormat.getInstance().format(t);
+            }
+
+            @Override
+            public Pitch fromString(String string) {
+                return PitchFactory.getPitch(string);
+            }
+        };
+
+        columnStart
+                .setCellValueFactory(new Callback<CellDataFeatures<MIDINote, Double>, ObservableValue<Double>>() {
+                    public ObservableValue<Double> call(
+                            CellDataFeatures<MIDINote, Double> note) {
+                        // note.getValue() returns the MIDINote instance for a
+                        // particular TableView row
+                        MIDINote n = note.getValue();
+                        Property p = null;
+                        try {
+                            p = JavaBeanDoublePropertyBuilder
+                                    .create()
+                                    .bean(n)
+                                    .name("startBeat")
+                                    .build();
+                        } catch (NoSuchMethodException e) {
+                            e.printStackTrace();
+                        }
+                        return p;
+
+                        // return note.getValue().firstNameProperty();
+                    }
+                });
+        columnStart.setCellFactory(TextFieldTableCell
+                .<MIDINote, Double> forTableColumn(dsc));
+        columnStart.setOnEditCommit(
+                new EventHandler<CellEditEvent<MIDINote, Double>>() {
+                    @Override
+                    public void handle(CellEditEvent<MIDINote, Double> t) {
+                        ((MIDINote) t.getTableView().getItems().get(
+                                t.getTablePosition().getRow())
+                        ).setStartBeat(t.getNewValue());
+                    }
+                }
+                );
+
+        columnChannel
+                .setCellValueFactory(new Callback<CellDataFeatures<MIDINote, Integer>, ObservableValue<Integer>>() {
+                    public ObservableValue<Integer> call(
+                            CellDataFeatures<MIDINote, Integer> note) {
+                        MIDINote n = note.getValue();
+                        Property p = null;
+                        try {
+                            p = JavaBeanIntegerPropertyBuilder
+                                    .create()
+                                    .bean(n)
+                                    .name("channel")
+                                    .build();
+                        } catch (NoSuchMethodException e) {
+                            e.printStackTrace();
+                        }
+                        return p;
+                    }
+                });
+        columnChannel.setOnEditCommit(
+                new EventHandler<CellEditEvent<MIDINote, Integer>>() {
+                    @Override
+                    public void handle(CellEditEvent<MIDINote, Integer> t) {
+                        ((MIDINote) t.getTableView().getItems().get(
+                                t.getTablePosition().getRow())
+                        ).setChannel(t.getNewValue());
+                    }
+                }
+                );
+        columnChannel.setCellFactory(
+                ComboBoxTableCell.<MIDINote, Integer> forTableColumn(
+                        channelList));
+
+        columnDuration
+                .setCellValueFactory(new Callback<CellDataFeatures<MIDINote, Double>, ObservableValue<Double>>() {
+                    public ObservableValue<Double> call(
+                            CellDataFeatures<MIDINote, Double> note) {
+                        MIDINote n = note.getValue();
+                        Property p = null;
+                        try {
+                            p = JavaBeanDoublePropertyBuilder
+                                    .create()
+                                    .bean(n)
+                                    .name("duration")
+                                    .build();
+                        } catch (NoSuchMethodException e) {
+                            e.printStackTrace();
+                        }
+                        return p;
+                    }
+                });
+        columnDuration.setCellFactory(TextFieldTableCell
+                .<MIDINote, Double> forTableColumn(dsc));
+        columnDuration.setOnEditCommit(
+                new EventHandler<CellEditEvent<MIDINote, Double>>() {
+                    @Override
+                    public void handle(CellEditEvent<MIDINote, Double> t) {
+                        ((MIDINote) t.getTableView().getItems().get(
+                                t.getTablePosition().getRow())
+                        ).setDuration(t.getNewValue());
+                    }
+                }
+                );
+
+        columnPitch.setCellFactory(TextFieldTableCell
+                .<MIDINote, Pitch> forTableColumn(stringPitchConverter));
+        columnPitch.setOnEditCommit(
+                new EventHandler<CellEditEvent<MIDINote, Pitch>>() {
+                    @Override
+                    public void handle(CellEditEvent<MIDINote, Pitch> t) {
+                        ((MIDINote) t.getTableView().getItems().get(
+                                t.getTablePosition().getRow())
+                        ).setPitch(t.getNewValue());
+                    }
+                }
+                );
+        columnPitch
+                .setCellValueFactory(new Callback<CellDataFeatures<MIDINote, Pitch>, ObservableValue<Pitch>>() {
+                    public ObservableValue<Pitch> call(
+                            CellDataFeatures<MIDINote, Pitch> note) {
+                        MIDINote n = note.getValue();
+                        Property p = null;
+                        try {
+                            p = JavaBeanObjectPropertyBuilder
+                                    .create()
+                                    .bean(n)
+                                    .name("pitch")
+                                    .build();
+                        } catch (NoSuchMethodException e) {
+                            e.printStackTrace();
+                        }
+                        return p;
+                    }
+                });
+    }
+
+    static class ProgramStringListCell extends
+            ComboBoxTableCell<MIDINote, String> {
+
+        static ObservableList<String> patchNames;
+        static {
+            patchNames = FXCollections.observableArrayList();
+            for (MIDIGMPatch p : MIDIGMPatch.getAllPitched()) {
+                patchNames.add(p.getName());
+            }
+        }
+
+        public ProgramStringListCell() {
+            super(patchNames);
+        }
+
+        public ProgramStringListCell(ObservableList<String> programStrings) {
+            super(programStrings);
+        }
+
+        @Override
+        public void updateItem(String patchName, boolean empty) {
+            super.updateItem(patchName, empty);
+            if (patchName != null) {
+                setText(MIDIGMPatch.getPatch(patchName).getName());
+                logger.debug("patch name {}", patchName);
+
+                if (getTableRow() != null) {
+                    MIDINote note = (MIDINote) getTableRow().getItem();
+                    if (note != null) {
+                        logger.debug("Table row {}", note);
+                        int program = MIDIGMPatch.getPatch(patchName)
+                                .getProgram();
+                        note.setProgram(program);
+                    }
+                }
+            }
+        }
+    }
+
+    void configureInstrumentComboBox() {
+
+        ObservableList<Instrument> instrumentList = FXCollections
+                .observableArrayList();
+        for (Instrument p : Instrument.getAll()) {
+            logger.debug("adding instrument {}", p);
+            instrumentList.add(p);
+        }
+        instrumentComboBox.setItems(instrumentList);
+
+        instrumentComboBox.getSelectionModel().selectedItemProperty()
+                .addListener(new ChangeListener<Instrument>() {
+                    public void changed(
+                            ObservableValue<? extends Instrument> source,
+                            Instrument oldValue, Instrument newValue) {
+                        logger.debug("You selected: " + newValue);
+                        model.getSelectedTrack().setInstrument(newValue);
+                    }
+                });
+
+        instrumentComboBox.setCellFactory(
+                new Callback<ListView<Instrument>, ListCell<Instrument>>() {
+                    @Override
+                    public ListCell<Instrument> call(
+                            ListView<Instrument> param) {
+
+                        final ListCell<Instrument> cell = new ListCell<Instrument>() {
+                            @Override
+                            public void updateItem(Instrument item,
+                                    boolean empty) {
+                                super.updateItem(item, empty);
+                                if (item != null) {
+                                    setText(item.getName());
+                                }
+                                else {
+                                    setText(null);
+                                }
+                            }
+                        };
+                        return cell;
+                    }
+                });
+
+        // otherwise, you'd get the Instrument toString when combo is in unselected state
+        instrumentComboBox.setConverter(new StringConverter<Instrument>() {
+            @Override
+            public String toString(Instrument inst) {
+                if (inst == null) {
+                    return null;
+                } else {
+                    return inst.getName();
+                }
+            }
+
+            @Override
+            public Instrument fromString(String name) {
+                return Instrument.getByName(name);
+            }
+        });
     }
 
     /**

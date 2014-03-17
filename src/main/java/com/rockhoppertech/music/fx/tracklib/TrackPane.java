@@ -30,6 +30,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
+import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.MultipleSelectionModel;
@@ -38,11 +39,14 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Shape;
+import javafx.scene.text.FontSmoothingType;
+import javafx.scene.text.Text;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.rockhoppertech.music.midi.js.MIDITrack;
+
 
 /**
  * @author <a href="http://genedelisa.com/">Gene De Lisa</a>
@@ -179,7 +183,9 @@ public class TrackPane extends Pane {
         createBeats();
         drawLines();
     }
-
+    public int getBeatWidth() {
+        return beatWidth;
+    }
     public void drawLines() {
         this.getChildren().addAll(this.beatLines);
     }
@@ -191,12 +197,18 @@ public class TrackPane extends Pane {
         double width = this.getBoundsInLocal().getWidth();
         logger.debug("width {} height {}", width, height);
         logger.debug("pwidth {} ", getBoundsInParent().getWidth());
+        int beat = 2;
         for (x = beatWidth; x < width; x += beatWidth) {
             Line line = new Line(x, 0, x, height);
             // line.setFill(Color.BLACK);
             line.setStroke(Color.BLACK);
-            line.setStrokeWidth(2d);
+            line.setStrokeWidth(1d);
             beatLines.add(line);
+            Text t = new Text("" + beat++);
+            t.setFontSmoothingType(FontSmoothingType.LCD);
+            t.setLayoutX(x+1);
+            t.setLayoutY(t.getLayoutBounds().getHeight());
+            beatLines.add(t);
             logger.debug("line {}", line);
         }
     }
@@ -212,21 +224,23 @@ public class TrackPane extends Pane {
     }
 
     public void add(final MIDITrack track) {
+        logger.debug("adding track {}", track);
         this.tracks.add(track);
+        
         // notelist.addPropertyChangeListener(this);
         final TrackNode trackNode = new TrackNode(track, this);
-
         this.add(trackNode);
+        logger.debug("new node {}", trackNode);
 
         trackComponentMap.put(track,
                 trackNode);
 
-        trackNode.onMousePressedProperty().set(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-
-            }
-        });
+//        trackNode.onMousePressedProperty().set(new EventHandler<MouseEvent>() {
+//            @Override
+//            public void handle(MouseEvent event) {
+//
+//            }
+//        });
         // tc.onMouseMovedProperty().
 
         EventHandler<MouseEvent> handler = new EventHandler<MouseEvent>() {
@@ -289,6 +303,7 @@ public class TrackPane extends Pane {
                                     node.getTranslateX();
                             dragContext.initialTranslateY =
                                     node.getTranslateY();
+                            node.setCursor(Cursor.MOVE);
                         }
                     }
                 });
@@ -318,6 +333,11 @@ public class TrackPane extends Pane {
                                             + mouseEvent.getY()
                                             - dragContext.mouseAnchorY);
                             logger.debug("dragged to beat {}", getBeatForX(xx));
+                            //TODO might not be performant with big tracks. configurable?
+                            if (node instanceof TrackNode) {
+                                TrackNode tn = (TrackNode) node;
+                                tn.getTrack().setStartBeat(getBeatForX(xx));
+                            }
                         }
                     }
                 });
@@ -345,6 +365,7 @@ public class TrackPane extends Pane {
                                 TrackNode tn = (TrackNode) node;
                                 tn.getTrack().setStartBeat(getBeatForX(xx));
                             }
+                            node.setCursor(Cursor.DEFAULT);
 
                         }
                     }
