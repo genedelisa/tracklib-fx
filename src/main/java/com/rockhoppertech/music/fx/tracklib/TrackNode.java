@@ -24,8 +24,12 @@ import javafx.beans.property.adapter.JavaBeanDoubleProperty;
 import javafx.beans.property.adapter.JavaBeanDoublePropertyBuilder;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.event.EventHandler;
 import javafx.scene.Cursor;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Region;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.FontSmoothingType;
 import javafx.scene.text.Text;
 
@@ -74,7 +78,6 @@ public class TrackNode extends Region {
 
         try {
             startBeatProperty = JavaBeanDoublePropertyBuilder.create()
-                    // TODO why not on the track? It works on the note.
                     .bean(this.track)
                     // .bean(this.track.get(0))
                     .name("startBeat")
@@ -91,7 +94,37 @@ public class TrackNode extends Region {
             e.printStackTrace();
         }
 
+        leftResizeRect = new Rectangle(0, 0, 5, this.getPrefHeight());
+        leftResizeRect.setCursor(Cursor.W_RESIZE);
+        leftResizeRect.setFill(Color.BLUE);
+        getChildren().add(leftResizeRect);
+
+        rightResizeRect = new Rectangle(this.getPrefWidth() - 15, 0,
+                15, this.getPrefHeight());
+
+        rightResizeRect.setCursor(Cursor.E_RESIZE);
+        rightResizeRect.setFill(Color.BLUE);
+        getChildren().add(rightResizeRect);
+        rightResizeRect.toFront();
+        rightResizeRect.setOnMouseDragged(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent e) {
+                logger.debug("resize r x {}", e.getX());
+                e.consume();
+
+            }
+        });
+        rightResizeRect.setOnMouseExited(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent arg0) {
+
+            }
+        });
+
     }
+
+    Rectangle rightResizeRect;
+    Rectangle leftResizeRect;
 
     /**
      * @return the track
