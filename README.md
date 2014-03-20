@@ -2,7 +2,7 @@
 
 A project that uses the Rockhopper Music library.
 
-Organizes MIDITracks.
+Pre-pre-alpha version of an app that organizes MIDITracks.
 
 
 
