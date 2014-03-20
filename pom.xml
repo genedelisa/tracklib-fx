@@ -13,7 +13,7 @@
 	<inceptionYear>2013</inceptionYear>
 
 	<prerequisites>
-		<maven>3.0.4</maven>
+		<maven>3.2.1</maven>
 	</prerequisites>
 
 	<organization>
@@ -24,8 +24,8 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<java.src.version>1.7</java.src.version>
-		<java.target.version>1.7</java.target.version>
+		<java.src.version>1.8</java.src.version>
+		<java.target.version>1.8</java.target.version>
 
 		<!-- so you can specify which main to run from the cmd line: -DappClassname=whatever -->
 		<!-- In eclipse, add a parameter in the run configuration -->
@@ -42,7 +42,7 @@
 		<jemmy.version>0.9.3-SNAPSHOT</jemmy.version>
 
 		<!-- other -->
-		<commons-lang.version>3.2.1</commons-lang.version>
+		<commons-lang.version>3.3.1</commons-lang.version>
 		<google-guava.version>16.0.1</google-guava.version>
 
 		<javadocExecutable>${java.home}/../bin/javadoc</javadocExecutable>
@@ -107,7 +107,7 @@
 				<artifactId>license-maven-plugin</artifactId>
 				<version>1.5</version>
 				<configuration>
-					<verbose>true</verbose>
+					<verbose>false</verbose>
 				</configuration>
 				<executions>
 					<execution>
