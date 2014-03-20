@@ -490,7 +490,7 @@ public class TrackLibAppController {
                 new EventHandler<CellEditEvent<MIDINote, Double>>() {
                     @Override
                     public void handle(CellEditEvent<MIDINote, Double> t) {
-                        ((MIDINote) t.getTableView().getItems().get(
+                        (t.getTableView().getItems().get(
                                 t.getTablePosition().getRow())
                         ).setStartBeat(t.getNewValue());
                     }
@@ -519,7 +519,7 @@ public class TrackLibAppController {
                 new EventHandler<CellEditEvent<MIDINote, Integer>>() {
                     @Override
                     public void handle(CellEditEvent<MIDINote, Integer> t) {
-                        ((MIDINote) t.getTableView().getItems().get(
+                        ( t.getTableView().getItems().get(
                                 t.getTablePosition().getRow())
                         ).setChannel(t.getNewValue());
                     }
@@ -553,7 +553,7 @@ public class TrackLibAppController {
                 new EventHandler<CellEditEvent<MIDINote, Double>>() {
                     @Override
                     public void handle(CellEditEvent<MIDINote, Double> t) {
-                        ((MIDINote) t.getTableView().getItems().get(
+                        ( t.getTableView().getItems().get(
                                 t.getTablePosition().getRow())
                         ).setDuration(t.getNewValue());
                     }
@@ -566,7 +566,7 @@ public class TrackLibAppController {
                 new EventHandler<CellEditEvent<MIDINote, Pitch>>() {
                     @Override
                     public void handle(CellEditEvent<MIDINote, Pitch> t) {
-                        ((MIDINote) t.getTableView().getItems().get(
+                        ( t.getTableView().getItems().get(
                                 t.getTablePosition().getRow())
                         ).setPitch(t.getNewValue());
                     }
