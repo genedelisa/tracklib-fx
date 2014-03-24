@@ -23,7 +23,7 @@
 
 <configuration>
 
-	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder>
 		<!--  
 			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
@@ -55,10 +55,10 @@
 	</appender>
 
 	<logger name="com.rockhoppertech" level="DEBUG" />
-	<logger name="org.springframework" level="DEBUG" />
+    <logger name="com.rockhoppertech.music.midi.js" level="INFO" />
 
 	<root level="WARN">
-		<appender-ref ref="STDOUT" />
+		<appender-ref ref="CONSOLE" />
 <!-- 		<appender-ref ref="RollingFile" /> -->
 	</root>
 
