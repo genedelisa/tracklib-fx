@@ -76,6 +76,7 @@ public class TrackNode extends Region {
         sb.setLayoutY(h * 2d);
         this.getChildren().add(sb);
 
+
         try {
             startBeatProperty = JavaBeanDoublePropertyBuilder.create()
                     .bean(this.track)
