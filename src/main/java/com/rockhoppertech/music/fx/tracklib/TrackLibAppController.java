@@ -20,13 +20,16 @@ package com.rockhoppertech.music.fx.tracklib;
  * #L%
  */
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.URL;
-import java.util.ResourceBundle;
-
+import com.rockhoppertech.music.Pitch;
+import com.rockhoppertech.music.PitchFactory;
+import com.rockhoppertech.music.PitchFormat;
+import com.rockhoppertech.music.fx.cmn.musicxml.TrackToMusicXML;
+import com.rockhoppertech.music.fx.components.RTIDialog;
+import com.rockhoppertech.music.midi.gm.MIDIGMPatch;
+import com.rockhoppertech.music.midi.js.Instrument;
+import com.rockhoppertech.music.midi.js.MIDINote;
+import com.rockhoppertech.music.midi.js.MIDITrack;
+import com.rockhoppertech.music.midi.js.MIDITrackBuilder;
 import javafx.beans.property.Property;
 import javafx.beans.property.adapter.JavaBeanDoublePropertyBuilder;
 import javafx.beans.property.adapter.JavaBeanIntegerPropertyBuilder;
@@ -39,16 +42,9 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.ComboBoxBuilder;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TableColumn;
+import javafx.scene.control.*;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableColumn.CellEditEvent;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.effect.DropShadow;
@@ -62,22 +58,16 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
-
-import javax.xml.stream.XMLStreamException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.rockhoppertech.music.Pitch;
-import com.rockhoppertech.music.PitchFactory;
-import com.rockhoppertech.music.PitchFormat;
-import com.rockhoppertech.music.fx.cmn.musicxml.TrackToMusicXML;
-import com.rockhoppertech.music.fx.components.RTIDialog;
-import com.rockhoppertech.music.midi.gm.MIDIGMPatch;
-import com.rockhoppertech.music.midi.js.Instrument;
-import com.rockhoppertech.music.midi.js.MIDINote;
-import com.rockhoppertech.music.midi.js.MIDITrack;
-import com.rockhoppertech.music.midi.js.MIDITrackBuilder;
+import javax.xml.stream.XMLStreamException;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.URL;
+import java.util.ResourceBundle;
 
 /**
  * @author <a href="http://genedelisa.com/">Gene De Lisa</a>
@@ -244,6 +234,23 @@ public class TrackLibAppController {
         configureInstrumentComboBox();
 
         setupDragonDrop();
+
+        this.descriptionTextArea.textProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(final ObservableValue<? extends String> observable, final String oldValue, final String newValue) {
+                MIDITrack track = trackList.getSelectionModel().getSelectedItem();
+                track.setDescription(newValue);
+            }
+        });
+        this.nameTextField.textProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(final ObservableValue<? extends String> observable, final String oldValue, final String newValue) {
+                MIDITrack track = trackList.getSelectionModel().getSelectedItem();
+                track.setName(newValue);
+            }
+        });
+
+
 
         // columnStart
         // .setCellValueFactory(new PropertyValueFactory<MIDINote, Double>(
