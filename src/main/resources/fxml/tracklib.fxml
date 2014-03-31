@@ -1,21 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import com.rockhoppertech.music.fx.tracklib.*?>
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.collections.*?>
-<?import javafx.geometry.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.input.*?>
-<?import javafx.scene.layout.*?>
 <?scenebuilder-classpath-element ../../../../../rockymusic/rockymusic-fx/target/classes?>
 <?scenebuilder-classpath-element ../../../../../../../../.m2/repository/org/slf4j/slf4j-api/1.7.6/slf4j-api-1.7.6.jar?>
 <?scenebuilder-classpath-element ../../../../../../../../.m2/repository/com/rockhoppertech/rockymusic-core/0.0.1-SNAPSHOT/rockymusic-core-0.0.1-SNAPSHOT.jar?>
 <?scenebuilder-classpath-element ../../../../../../../../.m2/repository/org/glassfish/javax.json/1.0.4/javax.json-1.0.4.jar?>
 <?scenebuilder-classpath-element ../../../../target/classes?>
 
-<AnchorPane id="AnchorPane" fx:id="root" prefHeight="1000.0" prefWidth="1000.0" xmlns:fx="http://javafx.com/fxml" fx:controller="com.rockhoppertech.music.fx.tracklib.TrackLibAppController">
+<?import com.rockhoppertech.music.fx.tracklib.TrackPane?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.input.KeyCodeCombination?>
+<?import javafx.scene.layout.*?>
+<AnchorPane id="AnchorPane" fx:id="root" prefHeight="1000.0" prefWidth="1000.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" fx:controller="com.rockhoppertech.music.fx.tracklib.TrackLibAppController">
   <children>
     <BorderPane prefHeight="327.0" prefWidth="446.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
       <bottom>
@@ -47,14 +43,13 @@
                             <TextArea fx:id="descriptionTextArea" layoutX="122.0" layoutY="62.0" prefHeight="89.0" prefWidth="360.0" wrapText="true" />
                             <TableView fx:id="trackTable" editable="true" layoutY="219.0" prefHeight="299.0" prefWidth="460.0" AnchorPane.leftAnchor="22.0" AnchorPane.rightAnchor="14.0">
                               <columns>
-                                <TableColumn maxWidth="5000.0" minWidth="10.0" prefWidth="156.0" text="Start" fx:id="columnStart" />
-                                <TableColumn maxWidth="5000.0" minWidth="10.0" prefWidth="95.0" text="Pitch" fx:id="columnPitch" />
-                                <TableColumn maxWidth="5000.0" minWidth="10.0" prefWidth="206.0" text="Duration" fx:id="columnDuration" />
-                                <TableColumn prefWidth="75.0" text="Channel" fx:id="columnChannel" />
+                                <TableColumn fx:id="columnStart" maxWidth="5000.0" minWidth="10.0" prefWidth="156.0" text="Start" />
+                                <TableColumn fx:id="columnPitch" maxWidth="5000.0" minWidth="10.0" prefWidth="95.0" text="Pitch" />
+                                <TableColumn fx:id="columnDuration" maxWidth="5000.0" minWidth="10.0" prefWidth="206.0" text="Duration" />
+                                <TableColumn fx:id="columnChannel" prefWidth="75.0" text="Channel" />
                               </columns>
                             </TableView>
                             <TextArea fx:id="rawTextArea" layoutY="577.0" prefHeight="110.0" prefWidth="460.0" wrapText="false" AnchorPane.leftAnchor="22.0" AnchorPane.rightAnchor="14.0" />
-                            <Button layoutX="220.0" layoutY="533.0" mnemonicParsing="false" onAction="#saveChangesAction" text="Save Changes" />
                             <ComboBox fx:id="instrumentComboBox" layoutY="163.0" prefWidth="204.0" AnchorPane.leftAnchor="200.0" AnchorPane.rightAnchor="257.0" />
                           </children>
                         </AnchorPane>
